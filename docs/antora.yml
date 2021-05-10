@@ -1,0 +1,6 @@
+name: csi-driver-smb
+title: csi-driver-smb
+version: master
+start_page: ROOT:index.adoc
+nav:
+  - modules/ROOT/partials/nav.adoc

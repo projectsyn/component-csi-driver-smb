@@ -1,0 +1,12 @@
+parameters:
+  kapitan:
+    compile:
+      - input_paths:
+          - csi-driver-smb/component/app.jsonnet
+        input_type: jsonnet
+        output_path: apps/
+      - input_paths:
+          - csi-driver-smb/component/main.jsonnet
+        input_type: jsonnet
+        output_path: csi-driver-smb/
+
