@@ -6,14 +6,135 @@ The parent key for all of the following parameters is `csi_driver_smb`.
 
 [horizontal]
 type:: string
-default:: `syn-csi-driver-smb`
+default:: `kube-system`
 
 The namespace in which to deploy this component.
 
+
+== `pvc`
+
+[horizontal]
+type:: array
+default:: []
+
+List of PVs and optionally PVCs to create.
+Each array entry is a hash with the following supported keys:
+
+=== `name`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+The name of the PV/PVC
+
+=== `share_host`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+The SMB host name (FQDN or IP address)
+
+=== `share_name`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+The name of the share on the SMB host
+
+=== `capacity`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+Capacity of the PV/PVC. This value isn't enforced by k8s.
+
+=== `namespace`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+The namespace to which the PV should be restricted to and if enabled, where the PVC should be created.
+
+=== `username_ref`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+Vault reference to the username. Usually in the form of:
+
+[source]
+?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/<share_name>_username}'
+
+=== `password_ref`
+
+[horizontal]
+type:: string
+mandatory:: true
+
+Vault reference to the password. Usually in the form of:
+
+[source]
+?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/<share_name>_username}'
+
+=== `create_pvc
+type:: boolean
+default: false
+mandatory: false
+
+If a PVC object should also be created and directly bound to the PV. The PVC name will be set to the `name` parameter.
+
+=== `accessModes`
+
+[horizontal]
+type:: array
+default:: [ 'ReadWriteMany' ]
+mandatory:: false
+
+The access mode used for the PV/PVC
+
+=== `persistentVolumeReclaimPolicy`
+
+[horizontal]
+type:: string
+default:: null
+mandatory:: false
+
+The reclaimPolicy for the PV. If not set defaults to `Delete`.
+
+=== `mountOptions`
+
+[horizontal]
+type:: array
+default:: [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]
+mandatory:: false
+
+Mount options for the SMB share.
+
+=== `readOnly`
+type:: bolean
+defaul:: null
+mandatory:: false
+
+If the PV should be mounted as read-only. If not set defaults to `false`
 
 == Example
 
 [source,yaml]
 ----
 namespace: example-namespace
+pvs:
+  - name: my_share
+    share_host: 'smb_host.example.tld'
+    share_name: 'my_share'
+    capacity: '100Gi'
+    namespace: 'my-test-app'
+    username_ref: '?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/my_share_username}'
+    password_ref: '?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/my_share_password}'
+    create_pvc: true
 ----
