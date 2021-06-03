@@ -1,5 +1,11 @@
 parameters:
   kapitan:
+    dependencies:
+      - type: helm
+        output_path: dependencies/csi-driver-smb/helmcharts/csi-driver-smb
+        source: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
+        version: ${csi_driver_smb:charts:csi-driver-smb}
+        chart_name: csi-driver-smb
     compile:
       - input_paths:
           - csi-driver-smb/component/app.jsonnet
@@ -9,4 +15,12 @@ parameters:
           - csi-driver-smb/component/main.jsonnet
         input_type: jsonnet
         output_path: csi-driver-smb/
-
+      - output_path: csi-driver-smb/10_csi-driver-smb_helmchart
+        input_type: helm
+        output_type: yaml
+        input_paths:
+          - csi-driver-smb/helmcharts/csi-driver-smb
+        helm_values: ${csi_driver_smb:helmValues}
+        helm_params:
+          release_name: csi-driver-smb
+          namespace: "${csi_driver_smb:namespace}"

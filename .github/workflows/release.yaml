@@ -1,4 +1,3 @@
-
 name: Release
 on:
   push:
@@ -31,4 +30,3 @@ jobs:
           body: ${{steps.build_changelog.outputs.changelog}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

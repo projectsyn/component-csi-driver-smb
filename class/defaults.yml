@@ -1,3 +1,9 @@
 parameters:
   csi_driver_smb:
-    namespace: syn-csi-driver-smb
+    namespace: kube-system
+    charts:
+      csi-driver-smb: v0.6.0
+    pvs: []
+    helmValues:
+      serviceAccount:
+        create: false
