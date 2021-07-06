@@ -10,6 +10,7 @@ local params = inv.parameters.csi_driver_smb;
 local defaultMountOptions = [
   'dir_mode=0777',
   'file_mode=0777',
+  'nobrl',
   'vers=3.0',
 ];
 
