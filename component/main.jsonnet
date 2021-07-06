@@ -7,6 +7,12 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.csi_driver_smb;
 
+local defaultMountOptions = [
+  'dir_mode=0777',
+  'file_mode=0777',
+  'vers=3.0',
+];
+
 local pvs = [
   kube.PersistentVolume(pv.name) {
     spec+: {
@@ -15,7 +21,7 @@ local pvs = [
       },
       accessModes: com.getValueOrDefault(pv, 'accessModes', [ 'ReadWriteMany' ],),
       persistentVolumeReclaimPolicy: com.getValueOrDefault(pv, 'reclaimPolicy', null),
-      mountOptions: com.getValueOrDefault(pv, 'mountOptions', [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]),
+      mountOptions: com.getValueOrDefault(pv, 'mountOptions', defaultMountOptions),
       csi: {
         driver: 'smb.csi.k8s.io',
         readOnly: com.getValueOrDefault(pv, 'readOnly', null),
