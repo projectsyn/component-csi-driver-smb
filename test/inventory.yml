@@ -10,14 +10,14 @@ parameters:
     volumes:
       - name: my_share
         namespace: my-test-app
-        share_host: smb_host.example.tld
-        share_name: my_share
+        shareHost: smb_host.example.tld
+        shareName: my_share
         username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
         password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
       - name: overwrite
         namespace: my-test-app
-        share_host: smb_host.example.tld
-        share_name: my_share
+        shareHost: smb_host.example.tld
+        shareName: my_share
         username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
         password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
         createClaim: true

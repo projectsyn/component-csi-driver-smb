@@ -15,7 +15,7 @@ local volumes = [
       storageClassName: 'smb-%s' % [ pv.namespace ],
       csi+: {
         volumeAttributes: {
-          source: '//%s/%s' % [ pv.share_host, pv.share_name ],
+          source: '//%s/%s' % [ pv.shareHost, pv.shareName ],
         },
         volumeHandle: 'pv-%s-%s' % [ pv.namespace, pv.name ],
         nodeStageSecretRef: {
