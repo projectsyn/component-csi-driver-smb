@@ -10,57 +10,39 @@ default:: `kube-system`
 
 The namespace in which to deploy this component.
 
+== `defaultMountOptions`
 
-== `pvc`
+[horizontal]
+type:: array
+default:: [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]
+
+Mount options to use by default.
+
+== `volumes`
 
 [horizontal]
 type:: array
 default:: []
 
-List of PVs and optionally PVCs to create.
-Each array entry is a hash with the following supported keys:
+List of volumes to create. Each volume supports the following attributes:
 
-=== `name`
-
-[horizontal]
-type:: string
-mandatory:: true
-
-The name of the PV/PVC
-
-=== `share_host`
+=== `name`, `namespace`
 
 [horizontal]
 type:: string
 mandatory:: true
 
-The SMB host name (FQDN or IP address)
+The name and namespace of the Volume
 
-=== `share_name`
-
-[horizontal]
-type:: string
-mandatory:: true
-
-The name of the share on the SMB host
-
-=== `capacity`
+=== `shareHost`, `shareName`
 
 [horizontal]
 type:: string
 mandatory:: true
 
-Capacity of the PV/PVC. This value isn't enforced by k8s.
+The SMB host name (FQDN or IP address) and share name to use.
 
-=== `namespace`
-
-[horizontal]
-type:: string
-mandatory:: true
-
-The namespace to which the PV should be restricted to and if enabled, where the PVC should be created.
-
-=== `username_ref`
+=== `username`, `password`
 
 [horizontal]
 type:: string
@@ -68,73 +50,58 @@ mandatory:: true
 
 Vault reference to the username. Usually in the form of:
 
-[source]
-?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/<share_name>_username}'
+[source, yaml]
+----
+username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-<identifier>/username}'
+password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-<identifier>/password}'
+----
 
-=== `password_ref`
+Adjust theidentifier to your needs. If multiple volumes in the same namespace share the same credentials, it makes sense to use the namespace, in other cases the volume name or something completely different might be more appropriate.
 
-[horizontal]
-type:: string
-mandatory:: true
-
-Vault reference to the password. Usually in the form of:
-
-[source]
-?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/<share_name>_username}'
-
-=== `create_pvc
+=== `createClaim`
 type:: boolean
-default: false
-mandatory: false
+default:: `false`
 
-If a PVC object should also be created and directly bound to the PV. The PVC name will be set to the `name` parameter.
+Whether or not the PVC object should also be managed. Its name will be set to the `name` parameter.
 
-=== `accessModes`
 
-[horizontal]
-type:: array
-default:: [ 'ReadWriteMany' ]
-mandatory:: false
+=== `pvOverrides`, `pvcOverrides`
 
-The access mode used for the PV/PVC
+type:: dict
+default:: {}
 
-=== `persistentVolumeReclaimPolicy`
+Optional overrides for the PV or PVC resources that are being created.
 
-[horizontal]
-type:: string
-default:: null
-mandatory:: false
-
-The reclaimPolicy for the PV. If not set defaults to `Delete`.
-
-=== `mountOptions`
-
-[horizontal]
-type:: array
-default:: [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]
-mandatory:: false
-
-Mount options for the SMB share.
-
-=== `readOnly`
-type:: bolean
-defaul:: null
-mandatory:: false
-
-If the PV should be mounted as read-only. If not set defaults to `false`
+Note that while this could be used to overwrite PV capacity, the change would be purely cosmetic. Volume capacity is determined only by the backing SMB share.
 
 == Example
 
 [source,yaml]
 ----
-namespace: example-namespace
-pvs:
-  - name: my_share
-    share_host: 'smb_host.example.tld'
-    share_name: 'my_share'
-    capacity: '100Gi'
-    namespace: 'my-test-app'
-    username_ref: '?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/my_share_username}'
-    password_ref: '?{vaultkv:${cluster:tenant}/${cluster:name}/csi-driver-smb/my_share_password}'
-    create_pvc: true
+parameters:
+  csi_driver_smb:
+    namespace: example-namespace
+
+    # Will be merged with defaults from component. Use ~defaultMountOptions to reset
+    defaultMountOptions:
+      - nobrl
+
+    volumes:
+      - name: my_share
+        namespace: my-test-app
+        share_host: smb_host.example.tld
+        share_name: my_share
+        username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
+        password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
+      - name: overwrite
+        namespace: my-test-app
+        share_host: smb_host.example.tld
+        share_name: my_share
+        username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
+        password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
+        createClaim: true
+        pvOverrides:
+          spec:
+            capacity:
+              storage: 300Gi
 ----

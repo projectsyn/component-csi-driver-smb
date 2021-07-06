@@ -7,18 +7,13 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.csi_driver_smb;
 
-local pvs = [
-  kube.PersistentVolume(pv.name) {
+local volumes = [
+  kube.PersistentVolume(pv.name) +
+  params.pvTemplate +
+  {
     spec+: {
-      capacity: {
-        storage: pv.capacity,
-      },
-      accessModes: com.getValueOrDefault(pv, 'accessModes', [ 'ReadWriteMany' ],),
-      persistentVolumeReclaimPolicy: com.getValueOrDefault(pv, 'reclaimPolicy', null),
-      mountOptions: com.getValueOrDefault(pv, 'mountOptions', [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]),
-      csi: {
-        driver: 'smb.csi.k8s.io',
-        readOnly: com.getValueOrDefault(pv, 'readOnly', null),
+      storageClassName: 'smb-%s' % [ pv.namespace ],
+      csi+: {
         volumeAttributes: {
           source: '//%s/%s' % [ pv.share_host, pv.share_name ],
         },
@@ -28,31 +23,31 @@ local pvs = [
           namespace: pv.namespace,
         },
       },
-      storageClassName: 'smb-%s' % [ pv.namespace ],
     },
-  }
-  for pv in params.pvs
+  } +
+  com.getValueOrDefault(pv, 'pvOverrides', {})
+
+  for pv in params.volumes
 ];
 
-local pvcs = [
-  kube.PersistentVolumeClaim(pv.name) {
+local claims = [
+  kube.PersistentVolumeClaim(pv.name) +
+  params.pvcTemplate +
+  {
     metadata+: {
       namespace: pv.namespace,
     },
     spec+: {
-      accessModes: com.getValueOrDefault(pv, 'accessModes', [ 'ReadWriteMany' ],),
-      resources: {
-        requests: {
-          storage: pv.capacity,
-        },
-      },
       storageClassName: 'smb-%s' % [ pv.namespace ],
       volumeMode: 'Filesystem',
       volumeName: pv.name,
     },
-  }
-  for pv in params.pvs
+  } +
+  com.getValueOrDefault(pv, 'pvcOverrides', {})
+
+  for pv in std.filter(function(i) !!i.createClaim, params.volumes)
 ];
+
 local pvSecrets = [
   kube.Secret(pv.name + '-credentials') {
     metadata+: {
@@ -61,11 +56,11 @@ local pvSecrets = [
     // need to use stringData here for secret reveal to work
     // use keys which the csi-driver expects for the credentials secret
     stringData+: {
-      username: pv.username_ref,
-      password: pv.password_ref,
+      username: pv.username,
+      password: pv.password,
     },
   }
-  for pv in params.pvs
+  for pv in params.volumes
 ];
 
 local commonItemLabels = {
@@ -102,14 +97,14 @@ local syncConfigs = [
       } ],
     },
   }
-  for pv in params.pvs
+  for pv in params.volumes
 ];
 
 {
   '01_syncConfigs': syncConfigs,
   '02_pvSecrets': pvSecrets,
-  '03_pvs': std.prune(pvs),
-  '04_pvcs': std.prune(pvcs),
+  '03_pvs': std.prune(volumes),
+  '04_pvcs': std.prune(claims),
   '05_serviceaccount': kube.ServiceAccount('csi-smb-controller-sa') {
     metadata+: {
       namespace: params.namespace,
