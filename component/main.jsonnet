@@ -8,42 +8,46 @@ local inv = kap.inventory();
 local params = inv.parameters.csi_driver_smb;
 
 local volumes = [
-  kube.PersistentVolume(pv.name) +
-  params.pvTemplate +
-  {
-    spec+: {
-      storageClassName: 'smb-%s' % [ pv.namespace ],
-      csi+: {
-        volumeAttributes: {
-          source: '//%s/%s' % [ pv.shareHost, pv.shareName ],
-        },
-        volumeHandle: 'pv-%s-%s' % [ pv.namespace, pv.name ],
-        nodeStageSecretRef: {
-          name: '%s-credentials' % [ pv.name ],
-          namespace: pv.namespace,
+  local volume =
+    kube.PersistentVolume(pv.name) +
+    params.pvTemplate +
+    {
+      spec+: {
+        storageClassName: 'smb-%s' % [ pv.namespace ],
+        csi+: {
+          volumeAttributes+: {
+            source: '//%s/%s' % [ pv.shareHost, pv.shareName ],
+          },
+          volumeHandle: 'pv-%s-%s' % [ pv.namespace, pv.name ],
+          nodeStageSecretRef+: {
+            name: '%s-credentials' % [ pv.name ],
+            namespace: pv.namespace,
+          },
         },
       },
-    },
-  } +
-  com.getValueOrDefault(pv, 'pvOverrides', {})
+    };
+
+  std.mergePatch(volume, com.getValueOrDefault(pv, 'pvPatch', {}))
 
   for pv in params.volumes
 ];
 
 local claims = [
-  kube.PersistentVolumeClaim(pv.name) +
-  params.pvcTemplate +
-  {
-    metadata+: {
-      namespace: pv.namespace,
-    },
-    spec+: {
-      storageClassName: 'smb-%s' % [ pv.namespace ],
-      volumeMode: 'Filesystem',
-      volumeName: pv.name,
-    },
-  } +
-  com.getValueOrDefault(pv, 'pvcOverrides', {})
+  local claim =
+    kube.PersistentVolumeClaim(pv.name) +
+    params.pvcTemplate +
+    {
+      metadata+: {
+        namespace: pv.namespace,
+      },
+      spec+: {
+        storageClassName: 'smb-%s' % [ pv.namespace ],
+        volumeMode: 'Filesystem',
+        volumeName: pv.name,
+      },
+    };
+
+  std.mergePatch(claim, com.getValueOrDefault(pv, 'pvcPatch', {}))
 
   for pv in std.filter(function(i) com.getValueOrDefault(i, 'createClaim', false), params.volumes)
 ];

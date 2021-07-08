@@ -21,7 +21,7 @@ parameters:
         username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
         password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
         createClaim: true
-        pvOverrides:
+        pvPatch:
           spec:
             capacity:
               storage: 300Gi

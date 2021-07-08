@@ -65,12 +65,12 @@ default:: `false`
 Whether or not the PVC object should also be managed. Its name will be set to the `name` parameter.
 
 
-=== `pvOverrides`, `pvcOverrides`
+=== `pvPatch`, `pvcPatch`
 
 type:: dict
 default:: {}
 
-Optional overrides for the PV or PVC resources that are being created.
+Optional patches for the PV or PVC resources that are being created. Patches will be applied according to https://tools.ietf.org/html/rfc7396[RFC7396].
 
 Note that while this could be used to overwrite PV capacity, the change would be purely cosmetic. Volume capacity is determined only by the backing SMB share.
 
