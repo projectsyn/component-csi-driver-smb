@@ -45,7 +45,7 @@ local claims = [
   } +
   com.getValueOrDefault(pv, 'pvcOverrides', {})
 
-  for pv in std.filter(function(i) !!i.createClaim, params.volumes)
+  for pv in std.filter(function(i) com.getValueOrDefault(i, 'createClaim', false), params.volumes)
 ];
 
 local pvSecrets = [
