@@ -24,4 +24,4 @@ parameters:
         pvOverrides:
           spec:
             capacity:
-              storage: 300G
+              storage: 300Gi

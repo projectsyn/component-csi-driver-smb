@@ -74,13 +74,7 @@ local syncConfigs = [
     spec: {
       forceRecreate: true,
       namespaceSelector: {
-        labelSelector: {
-          matchExpressions: [ {
-            key: pv.name,
-            operator: 'NotIn',
-            values: [ pv.namespace ],
-          } ],
-        },
+        ignoreNames: [ pv.namespace ],
       },
       syncItems: [ {
         apiVersion: 'v1',
