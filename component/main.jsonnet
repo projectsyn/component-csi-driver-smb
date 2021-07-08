@@ -69,7 +69,10 @@ local commonItemLabels = {
   'app.kubernetes.io/component': 'csi-driver-smb',
 };
 
-local syncConfigs = [
+local nameField = function(i) i.metadata.name;
+
+// Items in an array must be sorted before calling `uniq`.
+local syncConfigs = std.uniq(std.sort([
   espejo.syncConfig('restrict-smb-' + pv.namespace) {
     spec: {
       forceRecreate: true,
@@ -92,7 +95,7 @@ local syncConfigs = [
     },
   }
   for pv in params.volumes
-];
+], nameField), nameField);
 
 {
   '01_syncConfigs': syncConfigs,
