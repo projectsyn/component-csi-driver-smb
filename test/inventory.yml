@@ -1,0 +1,27 @@
+---
+parameters:
+  csi_driver_smb:
+    namespace: example-namespace
+    defaultMountOptions:
+      - dir_mode=0777
+      - file_mode=0777
+      - nobrl
+      - vers=3.0
+    volumes:
+      - name: my_share
+        namespace: my-test-app
+        shareHost: smb_host.example.tld
+        shareName: my_share
+        username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
+        password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
+      - name: overwrite
+        namespace: my-test-app
+        shareHost: smb_host.example.tld
+        shareName: my_share
+        username: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/username}'
+        password: '?{vaultkv:${cluster:tenant}/${cluster:name}/smb-my-test-app/password}'
+        createClaim: true
+        pvPatch:
+          spec:
+            capacity:
+              storage: 300Gi

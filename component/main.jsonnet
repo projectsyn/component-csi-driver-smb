@@ -7,52 +7,51 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.csi_driver_smb;
 
-local pvs = [
-  kube.PersistentVolume(pv.name) {
-    spec+: {
-      capacity: {
-        storage: pv.capacity,
-      },
-      accessModes: com.getValueOrDefault(pv, 'accessModes', [ 'ReadWriteMany' ],),
-      persistentVolumeReclaimPolicy: com.getValueOrDefault(pv, 'reclaimPolicy', null),
-      mountOptions: com.getValueOrDefault(pv, 'mountOptions', [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]),
-      csi: {
-        driver: 'smb.csi.k8s.io',
-        readOnly: com.getValueOrDefault(pv, 'readOnly', null),
-        volumeAttributes: {
-          source: '//%s/%s' % [ pv.share_host, pv.share_name ],
-        },
-        volumeHandle: 'pv-%s-%s' % [ pv.namespace, pv.name ],
-        nodeStageSecretRef: {
-          name: '%s-credentials' % [ pv.name ],
-          namespace: pv.namespace,
+local volumes = [
+  local volume =
+    kube.PersistentVolume(pv.name) +
+    params.pvTemplate +
+    {
+      spec+: {
+        storageClassName: 'smb-%s' % [ pv.namespace ],
+        csi+: {
+          volumeAttributes+: {
+            source: '//%s/%s' % [ pv.shareHost, pv.shareName ],
+          },
+          volumeHandle: 'pv-%s-%s' % [ pv.namespace, pv.name ],
+          nodeStageSecretRef+: {
+            name: '%s-credentials' % [ pv.name ],
+            namespace: pv.namespace,
+          },
         },
       },
-      storageClassName: 'smb-%s' % [ pv.namespace ],
-    },
-  }
-  for pv in params.pvs
+    };
+
+  std.mergePatch(volume, com.getValueOrDefault(pv, 'pvPatch', {}))
+
+  for pv in params.volumes
 ];
 
-local pvcs = [
-  kube.PersistentVolumeClaim(pv.name) {
-    metadata+: {
-      namespace: pv.namespace,
-    },
-    spec+: {
-      accessModes: com.getValueOrDefault(pv, 'accessModes', [ 'ReadWriteMany' ],),
-      resources: {
-        requests: {
-          storage: pv.capacity,
-        },
+local claims = [
+  local claim =
+    kube.PersistentVolumeClaim(pv.name) +
+    params.pvcTemplate +
+    {
+      metadata+: {
+        namespace: pv.namespace,
       },
-      storageClassName: 'smb-%s' % [ pv.namespace ],
-      volumeMode: 'Filesystem',
-      volumeName: pv.name,
-    },
-  }
-  for pv in params.pvs
+      spec+: {
+        storageClassName: 'smb-%s' % [ pv.namespace ],
+        volumeMode: 'Filesystem',
+        volumeName: pv.name,
+      },
+    };
+
+  std.mergePatch(claim, com.getValueOrDefault(pv, 'pvcPatch', {}))
+
+  for pv in std.filter(function(i) com.getValueOrDefault(i, 'createClaim', false), params.volumes)
 ];
+
 local pvSecrets = [
   kube.Secret(pv.name + '-credentials') {
     metadata+: {
@@ -61,11 +60,11 @@ local pvSecrets = [
     // need to use stringData here for secret reveal to work
     // use keys which the csi-driver expects for the credentials secret
     stringData+: {
-      username: pv.username_ref,
-      password: pv.password_ref,
+      username: pv.username,
+      password: pv.password,
     },
   }
-  for pv in params.pvs
+  for pv in params.volumes
 ];
 
 local commonItemLabels = {
@@ -74,18 +73,15 @@ local commonItemLabels = {
   'app.kubernetes.io/component': 'csi-driver-smb',
 };
 
-local syncConfigs = [
+local nameField = function(i) i.metadata.name;
+
+// Items in an array must be sorted before calling `uniq`.
+local syncConfigs = std.uniq(std.sort([
   espejo.syncConfig('restrict-smb-' + pv.namespace) {
     spec: {
       forceRecreate: true,
       namespaceSelector: {
-        labelSelector: {
-          matchExpressions: [ {
-            key: pv.name,
-            operator: 'NotIn',
-            values: [ pv.namespace ],
-          } ],
-        },
+        ignoreNames: [ pv.namespace ],
       },
       syncItems: [ {
         apiVersion: 'v1',
@@ -102,14 +98,14 @@ local syncConfigs = [
       } ],
     },
   }
-  for pv in params.pvs
-];
+  for pv in params.volumes
+], nameField), nameField);
 
 {
   '01_syncConfigs': syncConfigs,
   '02_pvSecrets': pvSecrets,
-  '03_pvs': std.prune(pvs),
-  '04_pvcs': std.prune(pvcs),
+  '03_pvs': std.prune(volumes),
+  '04_pvcs': std.prune(claims),
   '05_serviceaccount': kube.ServiceAccount('csi-smb-controller-sa') {
     metadata+: {
       namespace: params.namespace,

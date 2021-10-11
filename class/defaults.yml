@@ -3,7 +3,33 @@ parameters:
     namespace: kube-system
     charts:
       csi-driver-smb: v1.1.0
-    pvs: []
     helmValues:
       serviceAccount:
         create: false
+
+    volumes: []
+
+    defaultMountOptions:
+      - dir_mode=0777
+      - file_mode=0777
+      - vers=3.0
+
+    pvTemplate:
+      spec:
+        capacity:
+          storage: 100Gi
+        accessModes:
+          - ReadWriteMany
+        persistentVolumeReclaimPolicy: Retain
+        mountOptions: '${csi_driver_smb:defaultMountOptions}'
+        csi:
+          driver: smb.csi.k8s.io
+
+    pvcTemplate:
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 100Gi
+        volumeMode: Filesystem
