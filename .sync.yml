@@ -1,3 +1,7 @@
 ---
 :global:
   componentName: csi-driver-smb
+
+docs/antora.yml:
+  name: csi-driver-smb
+  title: CSI driver SMB
