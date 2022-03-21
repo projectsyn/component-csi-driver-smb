@@ -1,6 +1,6 @@
 # Commodore Component: csi-driver-smb
 
-This is a [Commodore][commodore] Component for csi-driver-smb.
+This is a [Commodore][commodore] Component for [csi-driver-smb][].
 
 This repository is part of Project Syn.
 For documentation on Project Syn and this component, see https://syn.tools.
@@ -21,5 +21,6 @@ This library is licensed under [BSD-3-Clause](LICENSE).
 For information about how to contribute see [CONTRIBUTING](CONTRIBUTING.md).
 
 [commodore]: https://docs.syn.tools/commodore/index.html
+[csi-driver-smb]: https://github.com/kubernetes-csi/csi-driver-smb
 [asciidoc]: https://asciidoctor.org/
 [antora]: https://antora.org/
