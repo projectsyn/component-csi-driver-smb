@@ -22,5 +22,5 @@ parameters:
           - csi-driver-smb/helmcharts/csi-driver-smb
         helm_values: ${csi_driver_smb:helmValues}
         helm_params:
-          release_name: csi-driver-smb
+          name: csi-driver-smb
           namespace: "${csi_driver_smb:namespace}"

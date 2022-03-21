@@ -1,5 +1,14 @@
 ---
 parameters:
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-espejo/master/lib/espejo.libsonnet
+        output_path: vendor/lib/espejo.libsonnet
+
+  espejo:
+    namespace: syn-espejo
+
   csi_driver_smb:
     namespace: example-namespace
     defaultMountOptions:
