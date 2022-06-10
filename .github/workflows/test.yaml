@@ -5,7 +5,7 @@ on:
       - master
 
 env:
-  COMPONENT_NAME: csi-driver-smb
+  COMPONENT_NAME: CSI driver SMB
 
 jobs:
   linting:
