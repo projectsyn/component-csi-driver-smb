@@ -18,6 +18,15 @@ default:: [ 'dir_mode=0777', 'file_mode=0777', 'vers=3.0' ]
 
 Mount options to use by default.
 
+== `helmValues`
+
+[horizontal]
+type:: dict
+default:: See `class/defaults.yml`
+
+Values passed to Helm.
+See https://github.com/kubernetes-csi/csi-driver-smb/blob/master/charts/README.md[Chart README] for a list of possible parameters.
+
 == `volumes`
 
 [horizontal]
