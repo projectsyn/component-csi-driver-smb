@@ -1,0 +1,26 @@
+apiVersion: sync.appuio.ch/v1alpha1
+kind: SyncConfig
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    name: restrict-smb-my-test-app
+  name: restrict-smb-my-test-app
+  namespace: syn-espejo
+spec:
+  forceRecreate: true
+  namespaceSelector:
+    ignoreNames:
+      - my-test-app
+  syncItems:
+    - apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        labels:
+          app.kubernetes.io/component: csi-driver-smb
+          app.kubernetes.io/managed-by: espejo
+          app.kubernetes.io/part-of: syn
+        name: restrict-smb-my-test-app
+      spec:
+        hard:
+          smb-my-test-app.storageclass.storage.k8s.io/persistentvolumeclaims: '0'

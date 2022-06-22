@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    name: my_share
+  name: my_share
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 100Gi
+  csi:
+    driver: smb.csi.k8s.io
+    nodeStageSecretRef:
+      name: my_share-credentials
+      namespace: my-test-app
+    volumeAttributes:
+      source: //smb_host.example.tld/my_share
+    volumeHandle: pv-my-test-app-my_share
+  mountOptions:
+    - dir_mode=0777
+    - file_mode=0777
+    - vers=3.0
+    - dir_mode=0777
+    - file_mode=0777
+    - nobrl
+    - vers=3.0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: smb-my-test-app
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    name: overwrite
+  name: overwrite
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 300Gi
+  csi:
+    driver: smb.csi.k8s.io
+    nodeStageSecretRef:
+      name: overwrite-credentials
+      namespace: my-test-app
+    volumeAttributes:
+      source: //smb_host.example.tld/my_share
+    volumeHandle: pv-my-test-app-overwrite
+  mountOptions:
+    - dir_mode=0777
+    - file_mode=0777
+    - vers=3.0
+    - dir_mode=0777
+    - file_mode=0777
+    - nobrl
+    - vers=3.0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: smb-my-test-app
