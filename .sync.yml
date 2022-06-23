@@ -1,5 +1,3 @@
 :global:
   componentName: CSI driver SMB
-  githubUrl: https://github.com/projectsyn/component-csi-driver-smb
-  feature_goUnitTests: false
   feature_goldenTests: true
