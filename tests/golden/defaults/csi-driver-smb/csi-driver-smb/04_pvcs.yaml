@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    name: overwrite
+  name: overwrite
+  namespace: my-test-app
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: smb-my-test-app
+  volumeMode: Filesystem
+  volumeName: overwrite
