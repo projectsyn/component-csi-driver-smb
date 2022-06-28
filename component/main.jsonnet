@@ -7,6 +7,46 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.csi_driver_smb;
 
+local isOpenShift = std.startsWith(inv.parameters.facts.distribution, 'openshift');
+
+local namespace =
+  kube.Namespace(params.namespace)
+  {
+    metadata+: {
+      annotations+: {
+        // Allow Pods to be scheduled on any Node
+        [if isOpenShift then 'openshift.io/node-selector']: '',
+      },
+    },
+  };
+
+local rolebinding = if isOpenShift then
+  kube.RoleBinding('privileged')
+  {
+    metadata+: {
+      namespace: params.namespace,
+    },
+    roleRef_: {
+      kind: 'ClusterRole',
+      metadata: {
+        name: 'system:openshift:scc:privileged',
+      },
+    },
+    subjects_: [
+      {
+        kind: 'ServiceAccount',
+        metadata: {
+          name: sa,
+          namespace: params.namespace,
+        },
+      }
+      for sa in [
+        params.helmValues.serviceAccount.controller,
+        params.helmValues.serviceAccount.node,
+      ]
+    ],
+  };
+
 local volumes = [
   local volume =
     kube.PersistentVolume(pv.name) +
@@ -102,13 +142,10 @@ local syncConfigs = std.uniq(std.sort([
 ], nameField), nameField);
 
 {
+  '00_namespace': namespace,
   '01_syncConfigs': syncConfigs,
   '02_pvSecrets': pvSecrets,
   '03_pvs': std.prune(volumes),
   '04_pvcs': std.prune(claims),
-  '05_serviceaccount': kube.ServiceAccount('csi-smb-controller-sa') {
-    metadata+: {
-      namespace: params.namespace,
-    },
-  },
+  [if rolebinding != null then '05_rolebinding']: rolebinding,
 }

@@ -1,5 +1,8 @@
 ---
 parameters:
+  facts:
+    distribution: openshift
+
   kapitan:
     dependencies:
       - type: https
@@ -16,6 +19,10 @@ parameters:
       - file_mode=0777
       - nobrl
       - vers=3.0
+    helmValues:
+      serviceAccount:
+        controller: controller
+        node: node
     volumes:
       - name: my_share
         namespace: my-test-app

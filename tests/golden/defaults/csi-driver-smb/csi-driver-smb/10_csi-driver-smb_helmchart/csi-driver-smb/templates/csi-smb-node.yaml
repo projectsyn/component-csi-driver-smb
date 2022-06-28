@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.5.0
-    helm.sh/chart: csi-driver-smb-v1.5.0
+    app.kubernetes.io/version: v1.7.0
+    helm.sh/chart: csi-driver-smb-v1.7.0
   name: csi-smb-node
   namespace: example-namespace
 spec:
@@ -20,8 +20,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: v1.5.0
-        helm.sh/chart: csi-driver-smb-v1.5.0
+        app.kubernetes.io/version: v1.7.0
+        helm.sh/chart: csi-driver-smb-v1.7.0
     spec:
       containers:
         - args:
@@ -29,7 +29,7 @@ spec:
             - --probe-timeout=3s
             - --health-port=29643
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.5.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.6.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -50,7 +50,7 @@ spec:
               value: /csi/csi.sock
             - name: DRIVER_REG_SOCK_PATH
               value: /var/lib/kubelet/plugins/smb.csi.k8s.io/csi.sock
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.4.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.5.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
@@ -87,7 +87,7 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/smbplugin:v1.5.0
+          image: registry.k8s.io/sig-storage/smbplugin:v1.7.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -116,11 +116,12 @@ spec:
             - mountPath: /var/lib/kubelet/
               mountPropagation: Bidirectional
               name: mountpoint-dir
-      dnsPolicy: ClusterFirstWithHostNet
+      dnsPolicy: Default
       hostNetwork: true
       nodeSelector:
         kubernetes.io/os: linux
       priorityClassName: system-cluster-critical
+      serviceAccountName: node
       tolerations:
         - operator: Exists
       volumes:
