@@ -14,8 +14,7 @@ local namespace =
   {
     metadata+: {
       annotations+: {
-        // Allow Pods to be scheduled on any Node
-        [if isOpenShift then 'openshift.io/node-selector']: '',
+        [if isOpenShift then 'openshift.io/node-selector']: 'node-role.kubernetes.io/worker=',
       },
     },
   };
