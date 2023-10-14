@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.7.0
-    helm.sh/chart: csi-driver-smb-v1.7.0
+    app.kubernetes.io/version: v1.12.0
+    helm.sh/chart: csi-driver-smb-v1.12.0
   name: csi-smb-controller
   namespace: example-namespace
 spec:
@@ -21,8 +21,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: v1.7.0
-        helm.sh/chart: csi-driver-smb-v1.7.0
+        app.kubernetes.io/version: v1.12.0
+        helm.sh/chart: csi-driver-smb-v1.12.0
     spec:
       containers:
         - args:
@@ -30,10 +30,11 @@ spec:
             - --csi-address=$(ADDRESS)
             - --leader-election
             - --leader-election-namespace=example-namespace
+            - --extra-create-metadata=true
           env:
             - name: ADDRESS
               value: /csi/csi.sock
-          image: registry.k8s.io/sig-storage/csi-provisioner:v3.1.0
+          image: registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
           imagePullPolicy: IfNotPresent
           name: csi-provisioner
           resources:
@@ -42,6 +43,8 @@ spec:
             requests:
               cpu: 10m
               memory: 20Mi
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
@@ -50,7 +53,7 @@ spec:
             - --probe-timeout=3s
             - --health-port=29642
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.6.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.10.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -59,6 +62,8 @@ spec:
             requests:
               cpu: 10m
               memory: 20Mi
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
@@ -71,7 +76,7 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/smbplugin:v1.7.0
+          image: registry.k8s.io/sig-storage/smbplugin:v1.12.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -97,13 +102,20 @@ spec:
               memory: 20Mi
           securityContext:
             privileged: true
+            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-      dnsPolicy: Default
+            - mountPath: /tmp
+              name: tmp-dir
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
       nodeSelector:
         kubernetes.io/os: linux
       priorityClassName: system-cluster-critical
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: controller
       tolerations:
         - effect: NoSchedule
@@ -118,3 +130,5 @@ spec:
       volumes:
         - emptyDir: {}
           name: socket-dir
+        - emptyDir: {}
+          name: tmp-dir
