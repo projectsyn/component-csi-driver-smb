@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.7.0
-    helm.sh/chart: csi-driver-smb-v1.7.0
+    app.kubernetes.io/version: v1.12.0
+    helm.sh/chart: csi-driver-smb-v1.12.0
   name: controller
   namespace: example-namespace
 ---
@@ -17,8 +17,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.7.0
-    helm.sh/chart: csi-driver-smb-v1.7.0
+    app.kubernetes.io/version: v1.12.0
+    helm.sh/chart: csi-driver-smb-v1.12.0
   name: node
   namespace: example-namespace
 ---
@@ -29,8 +29,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.7.0
-    helm.sh/chart: csi-driver-smb-v1.7.0
+    app.kubernetes.io/version: v1.12.0
+    helm.sh/chart: csi-driver-smb-v1.12.0
   name: smb-external-provisioner-role
 rules:
   - apiGroups:
@@ -112,8 +112,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.7.0
-    helm.sh/chart: csi-driver-smb-v1.7.0
+    app.kubernetes.io/version: v1.12.0
+    helm.sh/chart: csi-driver-smb-v1.12.0
   name: smb-csi-provisioner-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
