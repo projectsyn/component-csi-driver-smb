@@ -102,12 +102,9 @@ spec:
               memory: 20Mi
           securityContext:
             privileged: true
-            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: /tmp
-              name: tmp-dir
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       nodeSelector:
@@ -130,5 +127,3 @@ spec:
       volumes:
         - emptyDir: {}
           name: socket-dir
-        - emptyDir: {}
-          name: tmp-dir
