@@ -1,5 +1,7 @@
 parameters:
   csi_driver_smb:
+    =_metadata:
+      multi_tenant: true
     namespace: kube-system
     charts:
       csi-driver-smb: v1.12.0
