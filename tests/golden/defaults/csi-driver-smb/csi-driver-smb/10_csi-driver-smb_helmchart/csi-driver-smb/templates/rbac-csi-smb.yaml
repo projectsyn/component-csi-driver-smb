@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.12.0
-    helm.sh/chart: csi-driver-smb-v1.12.0
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
   name: controller
   namespace: example-namespace
 ---
@@ -17,8 +17,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.12.0
-    helm.sh/chart: csi-driver-smb-v1.12.0
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
   name: node
   namespace: example-namespace
 ---
@@ -29,8 +29,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.12.0
-    helm.sh/chart: csi-driver-smb-v1.12.0
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
   name: smb-external-provisioner-role
 rules:
   - apiGroups:
@@ -42,6 +42,7 @@ rules:
       - list
       - watch
       - create
+      - patch
       - delete
   - apiGroups:
       - ''
@@ -106,14 +107,90 @@ rules:
       - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: csi-driver-smb
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: csi-driver-smb
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
+  name: smb-external-resizer-role
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - ''
+    resources:
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ''
+    resources:
+      - persistentvolumeclaims/status
+    verbs:
+      - update
+      - patch
+  - apiGroups:
+      - ''
+    resources:
+      - events
+    verbs:
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: csi-driver-smb
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: csi-driver-smb
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
+  name: csi-smb-node-secret-role
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - secrets
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.12.0
-    helm.sh/chart: csi-driver-smb-v1.12.0
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
   name: smb-csi-provisioner-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -122,4 +199,42 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: controller
+    namespace: example-namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: csi-driver-smb
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: csi-driver-smb
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
+  name: smb-csi-resizer-role
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: smb-external-resizer-role
+subjects:
+  - kind: ServiceAccount
+    name: controller
+    namespace: example-namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: csi-driver-smb
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: csi-driver-smb
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
+  name: csi-smb-node-secret-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csi-smb-node-secret-role
+subjects:
+  - kind: ServiceAccount
+    name: node
     namespace: example-namespace

@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.12.0
-    helm.sh/chart: csi-driver-smb-v1.12.0
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
   name: csi-smb-controller
   namespace: example-namespace
 spec:
@@ -14,6 +14,8 @@ spec:
   selector:
     matchLabels:
       app: csi-smb-controller
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -21,8 +23,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: v1.12.0
-        helm.sh/chart: csi-driver-smb-v1.12.0
+        app.kubernetes.io/version: 1.19.0
+        helm.sh/chart: csi-driver-smb-1.19.0
     spec:
       containers:
         - args:
@@ -31,29 +33,59 @@ spec:
             - --leader-election
             - --leader-election-namespace=example-namespace
             - --extra-create-metadata=true
+            - --feature-gates=HonorPVReclaimPolicy=true
+            - --retry-interval-max=30m
           env:
             - name: ADDRESS
               value: /csi/csi.sock
-          image: registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
+          image: registry.k8s.io/sig-storage/csi-provisioner:v5.3.0
           imagePullPolicy: IfNotPresent
           name: csi-provisioner
           resources:
             limits:
-              memory: 300Mi
+              memory: 400Mi
             requests:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+        - args:
+            - -csi-address=$(ADDRESS)
+            - -v=2
+            - -leader-election
+            - --leader-election-namespace=example-namespace
+            - -handle-volume-inuse-error=false
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          image: registry.k8s.io/sig-storage/csi-resizer:v1.14.0
+          imagePullPolicy: IfNotPresent
+          name: csi-resizer
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
         - args:
             - --csi-address=/csi/csi.sock
             - --probe-timeout=3s
-            - --health-port=29642
+            - --http-endpoint=localhost:29642
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.10.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.17.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -63,6 +95,9 @@ spec:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
@@ -76,21 +111,19 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/smbplugin:v1.12.0
+          image: registry.k8s.io/sig-storage/smbplugin:v1.19.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
             httpGet:
+              host: localhost
               path: /healthz
-              port: healthz
+              port: 29642
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
           name: smb
           ports:
-            - containerPort: 29642
-              name: healthz
-              protocol: TCP
             - containerPort: 29644
               name: metrics
               protocol: TCP
@@ -101,6 +134,9 @@ spec:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             privileged: true
           volumeMounts:
             - mountPath: /csi
@@ -123,6 +159,9 @@ spec:
           operator: Exists
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoSchedule
+          key: CriticalAddonsOnly
           operator: Exists
       volumes:
         - emptyDir: {}
