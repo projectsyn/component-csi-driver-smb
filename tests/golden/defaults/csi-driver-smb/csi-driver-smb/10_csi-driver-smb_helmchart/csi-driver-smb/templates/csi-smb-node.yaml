@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: v1.12.0
-    helm.sh/chart: csi-driver-smb-v1.12.0
+    app.kubernetes.io/version: 1.19.0
+    helm.sh/chart: csi-driver-smb-1.19.0
   name: csi-smb-node
   namespace: example-namespace
 spec:
@@ -20,16 +20,16 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: v1.12.0
-        helm.sh/chart: csi-driver-smb-v1.12.0
+        app.kubernetes.io/version: 1.19.0
+        helm.sh/chart: csi-driver-smb-1.19.0
     spec:
       containers:
         - args:
             - --csi-address=/csi/csi.sock
             - --probe-timeout=3s
-            - --health-port=29643
+            - --http-endpoint=localhost:29643
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.10.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.17.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -39,6 +39,9 @@ spec:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
@@ -52,16 +55,8 @@ spec:
               value: /csi/csi.sock
             - name: DRIVER_REG_SOCK_PATH
               value: /var/lib/kubelet/plugins/smb.csi.k8s.io/csi.sock
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0
           imagePullPolicy: IfNotPresent
-          livenessProbe:
-            exec:
-              command:
-                - /csi-node-driver-registrar
-                - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
-                - --mode=kubelet-registration-probe
-            initialDelaySeconds: 30
-            timeoutSeconds: 15
           name: node-driver-registrar
           resources:
             limits:
@@ -69,6 +64,10 @@ spec:
             requests:
               cpu: 10m
               memory: 20Mi
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
@@ -80,6 +79,7 @@ spec:
             - --endpoint=$(CSI_ENDPOINT)
             - --nodeid=$(KUBE_NODE_NAME)
             - --enable-get-volume-stats=true
+            - --krb5-prefix=
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
@@ -88,21 +88,18 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/smbplugin:v1.12.0
+          image: registry.k8s.io/sig-storage/smbplugin:v1.19.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
             httpGet:
+              host: localhost
               path: /healthz
-              port: healthz
+              port: 29643
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
           name: smb
-          ports:
-            - containerPort: 29643
-              name: healthz
-              protocol: TCP
           resources:
             limits:
               memory: 200Mi
@@ -110,11 +107,14 @@ spec:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             privileged: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: /var/lib/kubelet/
+            - mountPath: /var/lib/kubelet
               mountPropagation: Bidirectional
               name: mountpoint-dir
       dnsPolicy: ClusterFirstWithHostNet
