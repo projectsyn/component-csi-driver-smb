@@ -10,6 +10,8 @@ parameters:
         create: true
         controller: csi-smb-controller-sa
         node: csi-smb-node-sa
+      feature:
+        enableInlineVolume: false
 
     volumes: []
 

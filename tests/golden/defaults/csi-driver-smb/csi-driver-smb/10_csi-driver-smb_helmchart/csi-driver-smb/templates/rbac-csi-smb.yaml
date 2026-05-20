@@ -165,24 +165,6 @@ rules:
       - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/instance: csi-driver-smb
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.1
-    helm.sh/chart: csi-driver-smb-1.20.1
-  name: csi-smb-node-secret-role
-rules:
-  - apiGroups:
-      - ''
-    resources:
-      - secrets
-    verbs:
-      - get
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
@@ -218,23 +200,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: controller
-    namespace: example-namespace
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/instance: csi-driver-smb
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.1
-    helm.sh/chart: csi-driver-smb-1.20.1
-  name: csi-smb-node-secret-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: csi-smb-node-secret-role
-subjects:
-  - kind: ServiceAccount
-    name: node
     namespace: example-namespace
