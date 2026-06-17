@@ -3,8 +3,8 @@ parameters:
     dependencies:
       - type: helm
         output_path: dependencies/csi-driver-smb/helmcharts/csi-driver-smb
-        source: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
-        version: ${csi_driver_smb:charts:csi-driver-smb}
+        source: ${csi_driver_smb:charts:csi-driver-smb:source}
+        version: ${csi_driver_smb:charts:csi-driver-smb:version}
         chart_name: csi-driver-smb
     compile:
       - input_paths:
