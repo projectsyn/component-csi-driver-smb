@@ -10,6 +10,22 @@ default:: `kube-system`
 
 The namespace in which to deploy this component.
 
+== `charts`
+
+[horizontal]
+type:: dict
+default::
++
+[source,yaml]
+----
+csi-driver-smb:
+  source: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
+  version: 1.20.1
+----
+
+Holds the reference to the used version of the charts.
+See https://github.com/projectsyn/component-csi-driver-smb/blob/master/class/defaults.yml[class/defaults.yml] for the current version.
+
 == `defaultMountOptions`
 
 [horizontal]
