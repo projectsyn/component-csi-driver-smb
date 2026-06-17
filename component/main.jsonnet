@@ -3,8 +3,9 @@ local com = import 'lib/commodore.libjsonnet';
 local espejo = import 'lib/espejo.libsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
 local kube = import 'lib/kube.libjsonnet';
-local inv = kap.inventory();
+
 // The hiera parameters for the component
+local inv = kap.inventory();
 local params = inv.parameters.csi_driver_smb;
 
 local isOpenShift = std.startsWith(inv.parameters.facts.distribution, 'openshift');
@@ -106,43 +107,8 @@ local pvSecrets = [
   for pv in params.volumes
 ];
 
-local commonItemLabels = {
-  'app.kubernetes.io/managed-by': 'espejo',
-  'app.kubernetes.io/part-of': 'syn',
-  'app.kubernetes.io/component': 'csi-driver-smb',
-};
-
-local nameField = function(i) i.metadata.name;
-
-// Items in an array must be sorted before calling `uniq`.
-local syncConfigs = std.uniq(std.sort([
-  espejo.syncConfig('restrict-smb-' + pv.namespace) {
-    spec: {
-      forceRecreate: true,
-      namespaceSelector: {
-        ignoreNames: [ pv.namespace ],
-      },
-      syncItems: [ {
-        apiVersion: 'v1',
-        kind: 'ResourceQuota',
-        metadata: {
-          name: 'restrict-smb-%s' % [ pv.namespace ],
-          labels: commonItemLabels,
-        },
-        spec: {
-          hard: {
-            ['smb-%s.storageclass.storage.k8s.io/persistentvolumeclaims' % pv.namespace]: '0',
-          },
-        },
-      } ],
-    },
-  }
-  for pv in params.volumes
-], nameField), nameField);
-
 {
   '00_namespace': namespace,
-  '01_syncConfigs': syncConfigs,
   '02_pvSecrets': pvSecrets,
   '03_pvs': std.prune(volumes),
   '04_pvcs': std.prune(claims),
