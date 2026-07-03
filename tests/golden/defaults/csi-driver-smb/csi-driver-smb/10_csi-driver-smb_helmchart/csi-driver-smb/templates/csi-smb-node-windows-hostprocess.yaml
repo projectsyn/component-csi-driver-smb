@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.1
-    helm.sh/chart: csi-driver-smb-1.20.1
+    app.kubernetes.io/version: 1.20.3
+    helm.sh/chart: csi-driver-smb-1.20.3
   name: csi-smb-node-win
   namespace: example-namespace
 spec:
@@ -20,8 +20,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: 1.20.1
-        helm.sh/chart: csi-driver-smb-1.20.1
+        app.kubernetes.io/version: 1.20.3
+        helm.sh/chart: csi-driver-smb-1.20.3
     spec:
       containers:
         - args:
@@ -42,7 +42,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.16.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.17.0
           imagePullPolicy: IfNotPresent
           name: node-driver-registrar
           resources:
@@ -73,7 +73,7 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/smbplugin:v1.20.1-windows-hp
+          image: registry.k8s.io/sig-storage/smbplugin:v1.20.3-windows-hp
           imagePullPolicy: IfNotPresent
           name: smb
           resources:
@@ -93,7 +93,7 @@ spec:
             - -c
             - New-Item -ItemType Directory -Path C:\var\lib\kubelet\plugins\smb.csi.k8s.io\
               -Force
-          image: registry.k8s.io/sig-storage/smbplugin:v1.20.1-windows-hp
+          image: registry.k8s.io/sig-storage/smbplugin:v1.20.3-windows-hp
           imagePullPolicy: IfNotPresent
           name: init
           securityContext:
