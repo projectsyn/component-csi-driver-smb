@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.1
-    helm.sh/chart: csi-driver-smb-1.20.1
+    app.kubernetes.io/version: 1.20.3
+    helm.sh/chart: csi-driver-smb-1.20.3
   name: csi-smb-controller
   namespace: example-namespace
 spec:
@@ -23,8 +23,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: 1.20.1
-        helm.sh/chart: csi-driver-smb-1.20.1
+        app.kubernetes.io/version: 1.20.3
+        helm.sh/chart: csi-driver-smb-1.20.3
     spec:
       containers:
         - args:
@@ -33,12 +33,11 @@ spec:
             - --leader-election
             - --leader-election-namespace=example-namespace
             - --extra-create-metadata=true
-            - --feature-gates=HonorPVReclaimPolicy=true
             - --retry-interval-max=30m
           env:
             - name: ADDRESS
               value: /csi/csi.sock
-          image: registry.k8s.io/sig-storage/csi-provisioner:v6.1.1
+          image: registry.k8s.io/sig-storage/csi-provisioner:v6.3.0
           imagePullPolicy: IfNotPresent
           name: csi-provisioner
           resources:
@@ -64,7 +63,7 @@ spec:
           env:
             - name: ADDRESS
               value: /csi/csi.sock
-          image: registry.k8s.io/sig-storage/csi-resizer:v2.1.0
+          image: registry.k8s.io/sig-storage/csi-resizer:v2.2.0
           imagePullPolicy: IfNotPresent
           name: csi-resizer
           resources:
@@ -85,7 +84,7 @@ spec:
             - --probe-timeout=3s
             - --http-endpoint=localhost:29642
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.19.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -111,7 +110,7 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/smbplugin:v1.20.1
+          image: registry.k8s.io/sig-storage/smbplugin:v1.20.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
