@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: controller
   namespace: example-namespace
 ---
@@ -17,8 +17,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: node
   namespace: example-namespace
 ---
@@ -29,8 +29,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: smb-external-provisioner-role
 rules:
   - apiGroups:
@@ -113,8 +113,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: smb-external-resizer-role
 rules:
   - apiGroups:
@@ -171,8 +171,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: smb-csi-provisioner-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -190,8 +190,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: smb-csi-resizer-role
 roleRef:
   apiGroup: rbac.authorization.k8s.io

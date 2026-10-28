@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: csi-driver-smb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-smb
-    app.kubernetes.io/version: 1.20.3
-    helm.sh/chart: csi-driver-smb-1.20.3
+    app.kubernetes.io/version: 1.20.4
+    helm.sh/chart: csi-driver-smb-1.20.4
   name: csi-smb-node
   namespace: example-namespace
 spec:
@@ -20,8 +20,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-smb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-smb
-        app.kubernetes.io/version: 1.20.3
-        helm.sh/chart: csi-driver-smb-1.20.3
+        app.kubernetes.io/version: 1.20.4
+        helm.sh/chart: csi-driver-smb-1.20.4
     spec:
       containers:
         - args:
@@ -88,7 +88,7 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/smbplugin:v1.20.3
+          image: registry.k8s.io/sig-storage/smbplugin:v1.20.4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
